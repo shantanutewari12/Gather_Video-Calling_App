@@ -1,82 +1,101 @@
+<div align="center">
+
 # 📽️ Gather — Meetings Without Friction
 
-<div align="center">
-  <h3>✨ The World's Fastest Way to Meet ✨</h3>
-  <p><b>Built for the speed of thought. Zero accounts. Zero downloads. Total privacy.</b></p>
-  
+![Gather Banner](https://capsule-render.vercel.app/render?type=soft&color=auto&height=200&section=header&text=GATHER&fontSize=90&animation=fadeIn&fontAlignY=38&desc=Meetings%20at%20the%20Speed%20of%20Thought&descAlignY=62&descSize=20)
+
+<h3>✨ Experience the Magic of Instant Communication ✨</h3>
+
+<p align="center">
   <a href="https://app-blueprint-tau.vercel.app">
-    <img src="https://img.shields.io/badge/Live_App-Visit_Now-violet?style=for-the-badge&logo=vercel" alt="Live App" />
+    <img src="https://img.shields.io/badge/LIVE_DEMO-VISIT_NOW-violet?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
   </a>
-</div>
+  <a href="#-user-guide">
+    <img src="https://img.shields.io/badge/User_Guide-Read_More-cyan?style=for-the-badge&logo=googledocs&logoColor=white" alt="User Guide" />
+  </a>
+</p>
 
 ---
 
-## 🚀 Experience the Magic
+## ⚡ The Future is Instant ⚡
 
-Gather is a premium, "Made in India" video conferencing platform designed to strip away the friction of modern communication. Whether you're in Gurgaon or anywhere else in the world, jumping into a call should be as easy as sharing a link.
+**Gather** is a high-performance video conferencing platform designed to strip away the friction of modern communication. No accounts, no downloads—just instant connection.
 
-### 💎 Why Gather?
+<p align="center">
+  <b>🚀 Start Meeting in < 500ms</b> | <b>🔒 Peer-to-Peer Privacy</b> | <b>🇮🇳 Made in India</b>
+</p>
 
-*   **⚡ Instant Start**: Create a room and go live in less than 500ms.
-*   **🛰️ Real-time Presence**: Instant sync across all participants using Supabase Realtime.
-*   **🎨 Premium UI**: Glassmorphic design with ultra-smooth animations.
-*   **🔒 Secure & Private**: Peer-to-peer communication using WebRTC.
-*   **🔔 Smart Audio**: Melodic join/leave chimes for seamless awareness.
-*   **📱 Fully Responsive**: Desktop-grade experience on your mobile browser.
+---
+
+## 💎 Premium Features
+
+| 🛰️ Real-time Presence | 🎨 Glassmorphic UI | 🔔 Smart Chimes |
+| :---: | :---: | :---: |
+| Instant participant sync via Supabase | Sleek, modern design with smooth blurs | Melodic join/leave audio feedback |
+
+| ⚡ WebRTC Powered | 📱 Mobile First | 🔒 Secure Rooms |
+| :---: | :---: | :---: |
+| Low-latency P2P video/audio | Optimized for mobile browsers | Unique encrypted meeting codes |
 
 ---
 
 ## 📖 User Guide
 
-Getting started with Gather is intentionally simple. Follow these steps for the perfect meeting:
+<details>
+<summary><b>🛠️ Step 1: Create Your Workspace</b></summary>
+<br />
+Click the <b>"Create Room"</b> button. You'll be instantly transported to your private meeting space.
+</details>
 
-### 1. Create a Room
-Click on **"Create Room"** from the home screen. You'll be instantly navigated to a private room with a unique meeting code.
+<details>
+<summary><b>🔗 Step 2: Invite Your Team</b></summary>
+<br />
+Share the unique URL or meeting code with your colleagues. They can join instantly with one click.
+</details>
 
-### 2. Share the Link
-Copy the URL or the meeting code from the interface and send it to your friends or colleagues via WhatsApp, Slack, or Email.
+<details>
+<summary><b>🖥️ Step 3: Present Your Ideas</b></summary>
+<br />
+Use the <b>Screen Share</b> icon at the bottom to broadcast your screen to all participants in high definition.
+</details>
 
-### 3. Manage Your Media
-*   **Toggle Mic/Camera**: Use the controls at the bottom to mute/unmute or hide/show your video.
-*   **Screen Share**: Click the screen icon to share your entire window or a specific tab with other participants.
-*   **Audio Chimes**: You'll hear a melodic "Ding" when someone joins and a "Dong" when they leave.
-
-### 4. Leaving
-Simply click the **"Leave"** button or close your tab. We've implemented instant cleanup to ensure you don't leave any "ghost" tiles behind.
-
----
-
-## 🛠️ Technical Prowess
-
-This project leverages the most modern web technologies to ensure speed and stability:
-
-- **Frontend**: [React 19](https://react.dev/) + [Vite 7](https://vitejs.dev/)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/) (The future of styling)
-- **Realtime Layer**: [Supabase Realtime & Presence](https://supabase.com/realtime)
-- **Communication**: WebRTC (Peer-to-Peer)
-- **Routing**: [TanStack Router](https://tanstack.com/router)
-- **Animations**: [Framer Motion](https://www.framer.com/motion/)
+<details>
+<summary><b>🎵 Step 4: Sensory Feedback</b></summary>
+<br />
+Listen for the <i>melodic join chimes</i> that notify you when someone enters or leaves without interrupting the flow.
+</details>
 
 ---
 
-## 💻 Developer Installation
+## 🏗️ Technical Architecture
 
-If you want to run Gather locally:
+<p align="center">
+  <img src="https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB" />
+  <img src="https://img.shields.io/badge/Vite_7-646CFF?style=flat-square&logo=vite&logoColor=white" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS_4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" />
+  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white" />
+  <img src="https://img.shields.io/badge/WebRTC-333333?style=flat-square&logo=webrtc&logoColor=white" />
+</p>
+
+---
+
+## 🛠️ Local Development
 
 ```bash
-# 1. Clone the repository
+# Clone the repository
 git clone https://github.com/shantanutewari12/app-blueprint.git
 
-# 2. Install dependencies
+# Install dependencies
 npm install
 
-# 3. Start development server
+# Launch development server
 npm run dev
 ```
 
 ---
 
-<div align="center">
-  <p><b>Made with ❤️ in India</b></p>
-  <p><i>Optimized for Maruti Suzuki, Zomato, boAt, and the global tech ecosystem.</i></p>
+<p align="center">
+  <b>Designed with passion for the Indian Tech Ecosystem 🇮🇳</b>
+</p>
+
 </div>
