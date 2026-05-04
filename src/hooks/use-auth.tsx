@@ -2,24 +2,12 @@ import { createContext, useContext, type ReactNode } from "react";
 
 interface AuthContextValue {
   user: { id: string } | null;
-  session: any | null;
+  session: Record<string, unknown> | null;
   loading: boolean;
   signOut: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const signOut = async () => {
-    // No-op
-  };
-
-  return (
-    <AuthContext.Provider value={{ user: null, session: null, loading: false, signOut }}>
-      {children}
-    </AuthContext.Provider>
-  );
-}
+export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function useAuth() {
   const ctx = useContext(AuthContext);

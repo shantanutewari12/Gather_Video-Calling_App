@@ -1,5 +1,5 @@
 import { Outlet, Link, createRootRoute } from "@tanstack/react-router";
-import { AuthProvider } from "@/hooks/use-auth";
+import { AuthProvider } from "@/components/auth-provider";
 import { Toaster } from "@/components/ui/sonner";
 
 function NotFoundComponent() {
