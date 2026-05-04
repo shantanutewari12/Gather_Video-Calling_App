@@ -1,80 +1,57 @@
 <div align="center">
 
-<!-- Hero -->
-<img src="https://capsule-render.vercel.app/render?type=soft&color=gradient&customColorList=12&height=220&section=header&text=GATHER&fontSize=90&animation=fadeIn&fontAlignY=42&desc=Meetings%20at%20the%20Speed%20of%20Thought&descAlignY=65&descSize=18&fontColor=ffffff" width="100%" />
+<!-- Animated Header -->
+<img src="https://capsule-render.vercel.app/render?type=waving&color=7c3aed,06b6d4&height=200&section=header&text=GATHER&fontSize=80&fontColor=fff&animation=fadeIn&fontAlignY=40&desc=Meetings+at+the+Speed+of+Thought&descAlignY=65&descSize=18" width="100%"/>
 
 <br/>
 
-<h3>✨ Experience the Magic of Instant Communication ✨</h3>
+<h2>✨ Experience the Magic of Instant Communication ✨</h2>
 
 <p>
-  <a href="https://app-blueprint-tau.vercel.app">
-    <img src="https://img.shields.io/badge/🚀_LIVE_DEMO-VISIT_NOW-7c3aed?style=for-the-badge&logoColor=white" alt="Live Demo" />
+  <a href="https://app-blueprint-tau.vercel.app" target="_blank">
+    <img src="https://img.shields.io/badge/🚀%20LIVE%20DEMO-VISIT%20NOW-7c3aed?style=for-the-badge" alt="Live Demo"/>
   </a>
-  &nbsp;
+  &nbsp;&nbsp;
   <a href="#-user-guide">
-    <img src="https://img.shields.io/badge/📖_User_Guide-Read_More-06b6d4?style=for-the-badge&logoColor=white" alt="User Guide" />
+    <img src="https://img.shields.io/badge/📖%20USER%20GUIDE-READ%20MORE-06b6d4?style=for-the-badge" alt="User Guide"/>
   </a>
 </p>
 
 <br/>
 
-> **Gather** is a high-performance video conferencing platform designed to strip away the friction of modern communication. No accounts, no downloads — just instant connection.
+<blockquote>
+<b>Gather</b> is a high-performance video conferencing platform designed to strip away the friction of modern communication.<br/>
+No accounts, no downloads — just instant connection.
+</blockquote>
 
 <br/>
 
 <table>
   <tr>
-    <td align="center"><b>🚀 &lt;500ms</b></td>
-    <td align="center"><b>🔒 Peer-to-Peer</b></td>
-    <td align="center"><b>📱 Mobile First</b></td>
-    <td align="center"><b>🇮🇳 Made in India</b></td>
-  </tr>
-  <tr>
-    <td align="center">Start meeting instantly</td>
-    <td align="center">End-to-end privacy</td>
-    <td align="center">Works on any device</td>
-    <td align="center">Built for Indian tech</td>
+    <td align="center"><h3>🚀</h3><b>&lt;500ms</b><br/><sub>Time to start</sub></td>
+    <td align="center"><h3>🔒</h3><b>Peer-to-Peer</b><br/><sub>End-to-end privacy</sub></td>
+    <td align="center"><h3>📱</h3><b>Mobile First</b><br/><sub>Works on any device</sub></td>
+    <td align="center"><h3>🇮🇳</h3><b>Made in India</b><br/><sub>Built for Indian tech</sub></td>
   </tr>
 </table>
+
+</div>
 
 ---
 
 ## 💎 Premium Features
 
-<table>
-  <thead>
-    <tr>
-      <th align="center">🛰️ Real-time Presence</th>
-      <th align="center">🎨 Glassmorphic UI</th>
-      <th align="center">🔔 Smart Chimes</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center">Instant participant sync via Supabase</td>
-      <td align="center">Sleek, modern design with smooth blurs</td>
-      <td align="center">Melodic join/leave audio feedback</td>
-    </tr>
-  </tbody>
-</table>
+<div align="center">
 
-<table>
-  <thead>
-    <tr>
-      <th align="center">⚡ WebRTC Powered</th>
-      <th align="center">📱 Mobile First</th>
-      <th align="center">🔒 Secure Rooms</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center">Low-latency P2P video/audio</td>
-      <td align="center">Optimized for mobile browsers</td>
-      <td align="center">Unique encrypted meeting codes</td>
-    </tr>
-  </tbody>
-</table>
+| 🛰️ Real-time Presence | 🎨 Glassmorphic UI | 🔔 Smart Chimes |
+|:---:|:---:|:---:|
+| Instant participant sync via Supabase | Sleek, modern design with smooth blurs | Melodic join/leave audio feedback |
+
+| ⚡ WebRTC Powered | 📱 Mobile First | 🔒 Secure Rooms |
+|:---:|:---:|:---:|
+| Low-latency P2P video/audio | Optimized for mobile browsers | Unique encrypted meeting codes |
+
+</div>
 
 ---
 
@@ -86,6 +63,7 @@
 
 Click the **"Create Room"** button. You'll be instantly transported to your private meeting space. No signup, no waiting.
 
+<br/>
 </details>
 
 <details>
@@ -94,6 +72,7 @@ Click the **"Create Room"** button. You'll be instantly transported to your priv
 
 Share the unique URL or meeting code with your colleagues. They can join instantly with one click — no account needed.
 
+<br/>
 </details>
 
 <details>
@@ -102,6 +81,7 @@ Share the unique URL or meeting code with your colleagues. They can join instant
 
 Use the **Screen Share** icon at the bottom to broadcast your screen to all participants in high definition.
 
+<br/>
 </details>
 
 <details>
@@ -110,19 +90,22 @@ Use the **Screen Share** icon at the bottom to broadcast your screen to all part
 
 Listen for the *melodic join chimes* that notify you when someone enters or leaves — without ever interrupting the flow.
 
+<br/>
 </details>
 
 ---
 
 ## 🏗️ Tech Stack
 
-<p>
-  <img src="https://img.shields.io/badge/React_19-20232A?style=flat-square&logo=react&logoColor=61DAFB" />
-  <img src="https://img.shields.io/badge/Vite_7-646CFF?style=flat-square&logo=vite&logoColor=white" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS_4-38B2AC?style=flat-square&logo=tailwind-css&logoColor=white" />
-  <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white" />
-  <img src="https://img.shields.io/badge/WebRTC-333333?style=flat-square&logo=webrtc&logoColor=white" />
-</p>
+<div align="center">
+
+![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![Vite](https://img.shields.io/badge/Vite_7-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS_4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![WebRTC](https://img.shields.io/badge/WebRTC-333333?style=for-the-badge&logo=webrtc&logoColor=white)
+
+</div>
 
 ---
 
@@ -141,6 +124,8 @@ npm run dev
 
 ---
 
-<img src="https://capsule-render.vercel.app/render?type=waving&color=gradient&customColorList=12&height=100&section=footer&text=Made%20with%20%E2%9D%A4%EF%B8%8F%20in%20India&fontSize=20&fontColor=ffffff&animation=twinkling" width="100%" />
+<div align="center">
+
+<img src="https://capsule-render.vercel.app/render?type=waving&color=7c3aed,06b6d4&height=120&section=footer&text=Made+with+%E2%9D%A4%EF%B8%8F+in+India&fontSize=22&fontColor=fff&animation=twinkling" width="100%"/>
 
 </div>
