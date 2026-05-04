@@ -73,35 +73,33 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
-      <main className="pt-20 sm:pt-24">
+      <main>
         {/* Hero */}
-        <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden px-4 py-12 sm:px-6 lg:px-8 sm:py-20">
-          {/* Video Background */}
-          <div className="absolute inset-0 -z-10 overflow-hidden">
+        <section className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
+          {/* Video Background - Full coverage from top */}
+          <div className="absolute inset-0 -z-10">
             <video
               autoPlay
               loop
               muted
               playsInline
-              className="h-full w-full object-cover opacity-30 grayscale-[0.5] contrast-[1.2]"
+              className="h-full w-full object-cover opacity-30 grayscale-[0.3]"
             >
               <source
                 src="https://assets.mixkit.co/videos/preview/mixkit-abstract-flowing-purple-and-blue-gradient-background-video-41227-large.mp4"
                 type="video/mp4"
               />
             </video>
-            <div className="absolute inset-0 bg-gradient-to-b from-background via-background/60 to-background" />
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,0,0,0.4)_100%)]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-background/40 to-background" />
           </div>
 
-          <div className="mx-auto max-w-7xl relative">
-            <div className="text-center animate-in fade-in slide-in-from-bottom-10 duration-1000 ease-out">
-              <div className="inline-flex select-none items-center gap-2 rounded-full bg-white/5 px-4 py-1.5 text-sm font-semibold backdrop-blur-md shadow-2xl ring-1 ring-white/10 transition-all hover:bg-white/10">
-                <Sparkles className="h-4 w-4 text-violet-400 animate-pulse" />
-                <span className="bg-gradient-primary bg-clip-text text-transparent">
-                  The world's fastest way to meet
-                </span>
-              </div>
+          {/* Hero Content - Pushed down to clear navbar */}
+          <div className="mx-auto max-w-7xl relative pt-32 sm:pt-40 text-center">
+            <div className="animate-in fade-in slide-in-from-bottom-10 duration-1000 ease-out">
+              {/* <div className="inline-flex select-none items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold backdrop-blur-md shadow-2xl transition-all hover:bg-white/10">
+                <Sparkles className="h-4 w-4 text-violet-400" />
+                <span className="text-white/90 tracking-wide">The world's fastest way to meet</span>
+              </div> */}
               <h1 className="mt-8 text-6xl font-black leading-[0.95] tracking-tighter sm:text-8xl lg:text-9xl">
                 Meetings <br />
                 <span className="relative inline-block mt-2">
