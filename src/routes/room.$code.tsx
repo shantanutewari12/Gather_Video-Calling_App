@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, memo } from "react";
 import {
   Mic,
   MicOff,
@@ -242,14 +242,14 @@ function RoomPage() {
     }
   }, [joined, localStream]);
 
-  // Sync mic/cam states to stream tracks
+  // Sync mic/cam states to stream tracks — use ref so stale localStream state never causes issues
   useEffect(() => {
-    localStream?.getAudioTracks().forEach((t) => (t.enabled = micOn));
-  }, [micOn, localStream]);
+    streamRef.current?.getAudioTracks().forEach((t) => (t.enabled = micOn));
+  }, [micOn]);
 
   useEffect(() => {
-    localStream?.getVideoTracks().forEach((t) => (t.enabled = camOn));
-  }, [camOn, localStream]);
+    streamRef.current?.getVideoTracks().forEach((t) => (t.enabled = camOn));
+  }, [camOn]);
 
   // WebRTC + Supabase Realtime presence/signaling
   useEffect(() => {
@@ -384,7 +384,9 @@ function RoomPage() {
       for (const candidate of pending) {
         try {
           await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch { /* ignore */ }
+        } catch {
+          /* ignore */
+        }
       }
     };
 
@@ -425,7 +427,9 @@ function RoomPage() {
       }
       try {
         await pc.addIceCandidate(new RTCIceCandidate(payload.candidate as RTCIceCandidateInit));
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     });
 
     ch.on("broadcast", { event: "reaction" }, ({ payload }) => {
@@ -511,48 +515,60 @@ function RoomPage() {
   };
 
   const leave = () => {
+    // untrack triggers instant "leave" presence event on other clients
+    void channelRef.current?.untrack();
     streamRef.current?.getTracks().forEach((t) => t.stop());
     Object.values(pcsRef.current).forEach((pc) => pc.close());
     navigate({ to: "/" });
   };
 
+  // Replace only the video track — keeps existing audio track alive
+  const swapVideoTrack = useCallback((newVideoTrack: MediaStreamTrack) => {
+    if (!streamRef.current) return;
+    streamRef.current.getVideoTracks().forEach((t) => {
+      t.stop();
+      streamRef.current!.removeTrack(t);
+    });
+    streamRef.current.addTrack(newVideoTrack);
+    setLocalStream(new MediaStream(streamRef.current.getTracks()));
+    if (videoRef.current) videoRef.current.srcObject = streamRef.current;
+    Object.values(pcsRef.current).forEach((pc) => {
+      const sender = pc.getSenders().find((s) => s.track?.kind === "video");
+      if (sender) void sender.replaceTrack(newVideoTrack);
+    });
+  }, []);
+
+  const restoreCamera = useCallback(async () => {
+    try {
+      const cam = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+      });
+      swapVideoTrack(cam.getVideoTracks()[0]);
+    } catch {
+      /* ignore */
+    }
+  }, [swapVideoTrack]);
+
   const toggleScreenShare = async () => {
     if (screenSharing) {
       setScreenSharing(false);
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        replaceLocalStream(stream);
-      } catch {
-        /* ignore */
-      }
+      await restoreCamera();
       return;
     }
     try {
-      const screen = await (
-        navigator.mediaDevices as MediaDevices & {
-          getDisplayMedia: (c: MediaStreamConstraints) => Promise<MediaStream>;
-        }
-      ).getDisplayMedia({ video: true });
-      // Keep mic from current stream
-      const audio = streamRef.current?.getAudioTracks()[0];
-      if (audio) screen.addTrack(audio);
-      replaceLocalStream(screen);
-      screen.getVideoTracks()[0].onended = () => setScreenSharing(false);
+      const screen = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+      const screenTrack = screen.getVideoTracks()[0];
+      // When user clicks browser's "Stop sharing" button
+      screenTrack.addEventListener("ended", () => {
+        setScreenSharing(false);
+        void restoreCamera();
+      });
+      swapVideoTrack(screenTrack);
       setScreenSharing(true);
     } catch {
       toast.error("Screen share cancelled");
+      setScreenSharing(false);
     }
-  };
-
-  const replaceLocalStream = (stream: MediaStream) => {
-    streamRef.current?.getVideoTracks().forEach((t) => t.stop());
-    streamRef.current = stream;
-    if (videoRef.current) videoRef.current.srcObject = stream;
-    const newVideoTrack = stream.getVideoTracks()[0];
-    Object.values(pcsRef.current).forEach((pc) => {
-      const sender = pc.getSenders().find((s) => s.track?.kind === "video");
-      if (sender && newVideoTrack) void sender.replaceTrack(newVideoTrack);
-    });
   };
 
   if (loading) {
@@ -948,7 +964,7 @@ function RoomPage() {
   );
 }
 
-function Tile({
+const Tile = memo(function Tile({
   name,
   children,
   accent,
@@ -966,7 +982,7 @@ function Tile({
       </div>
     </div>
   );
-}
+});
 
 function Avatar({ name }: { name: string }) {
   return (
@@ -978,11 +994,12 @@ function Avatar({ name }: { name: string }) {
   );
 }
 
-function PeerVideo({ peer }: { peer: RemotePeer }) {
+const PeerVideo = memo(function PeerVideo({ peer }: { peer: RemotePeer }) {
   const ref = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     if (ref.current && peer.stream) {
       ref.current.srcObject = peer.stream;
+      void ref.current.play().catch(() => {});
     }
   }, [peer.stream]);
 
@@ -996,9 +1013,9 @@ function PeerVideo({ peer }: { peer: RemotePeer }) {
       className="h-full w-full object-cover transition-opacity duration-500"
     />
   );
-}
+});
 
-function ControlBtn({
+const ControlBtn = memo(function ControlBtn({
   children,
   active,
   onClick,
@@ -1024,9 +1041,9 @@ function ControlBtn({
       {children}
     </button>
   );
-}
+});
 
-function PersonRow({
+const PersonRow = memo(function PersonRow({
   name,
   host,
   micOn = true,
@@ -1051,7 +1068,7 @@ function PersonRow({
       )}
     </div>
   );
-}
+});
 
 function ShareDialog({
   open,
