@@ -355,7 +355,8 @@ function RoomPage() {
 
     ch.on("presence", { event: "sync" }, () => {
       const state = ch.presenceState() as Record<string, PresenceState[]>;
-      const next: Record<string, RemotePeer> = {};
+      // Build next from presence state, but DON'T include stream yet
+      const next: Record<string, Omit<RemotePeer, "stream">> = {};
       Object.entries(state).forEach(([key, metas]) => {
         if (key === myId) return;
         const meta = metas[0];
@@ -365,19 +366,25 @@ function RoomPage() {
           micOn: meta?.micOn ?? true,
           camOn: meta?.camOn ?? true,
           handRaised: meta?.handRaised ?? false,
-          stream: peers[key]?.stream,
         };
       });
       setPeers((prev) => {
         const merged: Record<string, RemotePeer> = {};
+        // Only update presence metadata; ALWAYS preserve stream from prev state
         Object.keys(next).forEach((k) => {
-          merged[k] = { ...next[k], stream: prev[k]?.stream };
+          merged[k] = {
+            ...next[k],
+            stream: prev[k]?.stream, // CRITICAL: never drop the stream
+          };
         });
-        // drop peers no longer present
+        // Close connections for peers that truly left
         Object.keys(prev).forEach((k) => {
-          if (!next[k] && pcsRef.current[k]) {
-            pcsRef.current[k].close();
-            delete pcsRef.current[k];
+          if (!next[k]) {
+            if (pcsRef.current[k]) {
+              pcsRef.current[k].close();
+              delete pcsRef.current[k];
+            }
+            // Don't add to merged → peer is removed from UI
           }
         });
         return merged;
@@ -394,11 +401,12 @@ function RoomPage() {
 
     ch.on("presence", { event: "leave" }, ({ key }) => {
       playChime(false); // descending chime = someone left
-      const pc = pcsRef.current[key];
-      if (pc) {
-        pc.close();
+      // Immediately close the peer connection
+      if (pcsRef.current[key]) {
+        pcsRef.current[key].close();
         delete pcsRef.current[key];
       }
+      // Immediately remove from UI — no delay
       setPeers((p) => {
         const n = { ...p };
         delete n[key];
@@ -648,95 +656,102 @@ function RoomPage() {
     );
   }
 
+  // Detect mobile for screen share
+  const isMobile = typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
   // Pre-join lobby
   if (!joined) {
     return (
       <div className="flex min-h-screen flex-col bg-call-bg text-white">
-        <header className="flex items-center justify-between p-4">
-          <Link to="/" className="flex items-center gap-2 text-sm text-white/70 hover:text-white">
-            <img src={logo} alt="Gather" width={28} height={28} className="h-7 w-7" />
-            Gather
+        {/* Lobby Header */}
+        <header className="flex items-center justify-between border-b border-white/5 px-4 py-3 backdrop-blur-xl">
+          <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-white">
+            <img src={logo} alt="Gather" width={28} height={28} className="h-7 w-7 rounded-lg" />
+            <span className="font-black tracking-tight">Gather</span>
           </Link>
           <button
             onClick={copyLink}
-            className="flex items-center gap-2 rounded-lg bg-white/10 px-3 py-1.5 text-xs hover:bg-white/15"
+            className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-mono hover:bg-white/10 transition-all"
           >
-            {linkCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
-            <span className="font-mono">{roomCode}</span>
+            {linkCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            {roomCode}
           </button>
         </header>
 
-        <div className="mx-auto flex w-full max-w-2xl flex-1 flex-col items-center justify-center gap-10 px-4 pb-16">
-          <div className="w-full max-w-xl">
-            <div className="aspect-video overflow-hidden rounded-[2.5rem] border-4 border-white/5 bg-call-tile shadow-2xl ring-1 ring-white/10">
+        {/* Lobby Body — Side by side on desktop, stacked on mobile */}
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-4 py-8 sm:flex-row sm:items-center sm:justify-center sm:gap-10 sm:py-0">
+          {/* Left: Camera Preview */}
+          <div className="w-full max-w-sm sm:max-w-md">
+            <div className="aspect-video w-full overflow-hidden rounded-[2rem] border border-white/10 bg-call-tile shadow-2xl ring-1 ring-white/5">
               <LobbyPreview stream={localStream} camOn={camOn} name={senderName} />
             </div>
-            <div className="mt-6 flex justify-center gap-4">
+            <div className="mt-4 flex justify-center gap-3">
               <ControlBtn
                 active={micOn}
                 onClick={() => setMicOn((v) => !v)}
                 label={micOn ? "Mute" : "Unmute"}
               >
-                {micOn ? <Mic className="h-6 w-6" /> : <MicOff className="h-6 w-6" />}
+                {micOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
               </ControlBtn>
               <ControlBtn
                 active={camOn}
                 onClick={() => setCamOn((v) => !v)}
                 label={camOn ? "Stop video" : "Start video"}
               >
-                {camOn ? <VideoIcon className="h-6 w-6" /> : <VideoOff className="h-6 w-6" />}
+                {camOn ? <VideoIcon className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
               </ControlBtn>
             </div>
           </div>
 
-          <div className="w-full max-w-md text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+          {/* Divider on desktop */}
+          <div className="hidden h-40 w-px bg-white/5 sm:block" />
+
+          {/* Right: Meeting Info + Join Form */}
+          <div className="w-full max-w-sm">
+            <div className="mb-1 text-xs font-bold uppercase tracking-widest text-white/30">Meeting</div>
+            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
               {meeting?.title}
             </h1>
-            <p className="mt-4 text-lg text-white/60">
-              Meeting ID: <span className="font-mono text-success">{roomCode}</span>
+            <p className="mt-1 text-sm text-white/50">
+              Code: <span className="font-mono text-violet-400">{roomCode}</span>
             </p>
 
-            <div className="mt-8 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-sm">
-              <Input
-                readOnly
-                value={shareUrl}
-                className="border-0 bg-transparent text-sm text-white/80 focus-visible:ring-0"
-              />
-              <Button
-                onClick={copyLink}
-                size="sm"
-                variant="secondary"
-                className="shrink-0 bg-white/10 text-white hover:bg-white/20"
-              >
-                {linkCopied ? (
-                  <Check className="mr-1 h-4 w-4" />
-                ) : (
-                  <Copy className="mr-1 h-4 w-4" />
-                )}
-                {linkCopied ? "Copied" : "Copy"}
-              </Button>
-            </div>
-
-            <div className="mt-8 text-left">
-              <label className="text-xs font-medium uppercase tracking-wider text-white/40">
+            <div className="mt-6">
+              <label className="text-xs font-bold uppercase tracking-widest text-white/40">
                 Your name
               </label>
               <Input
                 value={guestName}
                 onChange={(e) => setGuestName(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && guestName.trim() && setJoined(true)}
                 placeholder="How should we call you?"
-                className="mt-2 h-12 border-white/15 bg-white/5 text-lg text-white placeholder:text-white/20 focus:border-primary/50"
+                autoFocus
+                className="mt-2 h-12 rounded-xl border-white/10 bg-white/5 text-base text-white placeholder:text-white/20 focus:border-violet-500/50 focus-visible:ring-violet-500/30"
               />
             </div>
 
-            <div className="mt-8">
+            <div className="mt-4">
               <Button
                 disabled={!guestName.trim()}
                 onClick={() => setJoined(true)}
-                className="h-14 w-full rounded-2xl bg-gradient-primary text-lg font-semibold text-primary-foreground shadow-glow hover:opacity-95"
+                className="h-12 w-full rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 text-base font-bold text-white shadow-lg shadow-violet-500/20 transition-all hover:opacity-90 hover:shadow-violet-500/40 disabled:opacity-40"
               >
                 Join meeting
+              </Button>
+            </div>
+
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.03] p-2">
+              <Input
+                readOnly
+                value={shareUrl}
+                className="h-8 border-0 bg-transparent text-xs text-white/50 focus-visible:ring-0"
+              />
+              <Button
+                onClick={copyLink}
+                size="sm"
+                className="h-8 shrink-0 rounded-lg bg-white/10 px-3 text-xs text-white hover:bg-white/20"
+              >
+                {linkCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
               </Button>
             </div>
           </div>
@@ -748,12 +763,14 @@ function RoomPage() {
   }
 
   const peerList = Object.values(peers);
-  const totalTiles = peerList.length + 1;
+  // Only count real peers (not the waiting placeholder)
+  const realPeerCount = peerList.length;
+  const totalTiles = realPeerCount + 1; // +1 for local
   const gridCols =
     totalTiles <= 1
       ? "grid-cols-1"
       : totalTiles === 2
-        ? "grid-cols-2"
+        ? "grid-cols-1 sm:grid-cols-2" // Always side-by-side on sm+
         : totalTiles <= 4
           ? "grid-cols-2"
           : totalTiles <= 9
@@ -960,8 +977,12 @@ function RoomPage() {
           >
             {camOn ? <VideoIcon className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
           </ControlBtn>
-          <ControlBtn active={!screenSharing} onClick={toggleScreenShare} label="Share screen">
-            <MonitorUp className="h-5 w-5" />
+          <ControlBtn
+            active={!screenSharing}
+            onClick={isMobile ? () => toast.info("Screen sharing is not available on mobile browsers.") : toggleScreenShare}
+            label={isMobile ? "Screen share unavailable on mobile" : "Share screen"}
+          >
+            <MonitorUp className={cn("h-5 w-5", isMobile && "opacity-40")} />
           </ControlBtn>
           <ControlBtn
             active={!handRaised}

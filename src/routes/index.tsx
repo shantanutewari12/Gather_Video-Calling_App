@@ -74,83 +74,98 @@ function Landing() {
       <SiteHeader />
 
       <main>
-        {/* Hero */}
-        <section className="relative flex min-h-[85vh] flex-col items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
-          {/* Video Background - Full coverage from top */}
-          <div className="absolute inset-0 -z-10">
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              className="h-full w-full object-cover opacity-30 grayscale-[0.3]"
-            >
+        {/* ─── Hero ─────────────────────────────────────────── */}
+        <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
+
+          {/* Full-screen video background */}
+          <div className="absolute inset-0 -z-20">
+            <video autoPlay loop muted playsInline className="h-full w-full object-cover opacity-20">
               <source
                 src="https://assets.mixkit.co/videos/preview/mixkit-abstract-flowing-purple-and-blue-gradient-background-video-41227-large.mp4"
                 type="video/mp4"
               />
             </video>
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-background/40 to-background" />
           </div>
 
-          {/* Hero Content - Pushed down to clear navbar */}
-          <div className="mx-auto max-w-7xl relative pt-32 sm:pt-40 text-center">
-            <div className="animate-in fade-in slide-in-from-bottom-10 duration-1000 ease-out">
-              {/* <div className="inline-flex select-none items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold backdrop-blur-md shadow-2xl transition-all hover:bg-white/10">
-                <Sparkles className="h-4 w-4 text-violet-400" />
-                <span className="text-white/90 tracking-wide">The world's fastest way to meet</span>
-              </div> */}
-              <h1 className="mt-8 text-6xl font-black leading-[0.95] tracking-tighter sm:text-8xl lg:text-9xl">
-                Meetings <br />
-                <span className="relative inline-block mt-2">
-                  <span className="relative text-primary">without friction.</span>
+          {/* Dark gradient overlay */}
+          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-background/60 via-background/70 to-background" />
+
+          {/* Ambient orbs */}
+          <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-violet-600/10 blur-[120px]" />
+          <div className="pointer-events-none absolute top-1/3 -left-32 -z-10 h-[400px] w-[400px] rounded-full bg-cyan-500/8 blur-[100px]" />
+          <div className="pointer-events-none absolute top-1/3 -right-32 -z-10 h-[400px] w-[400px] rounded-full bg-fuchsia-500/8 blur-[100px]" />
+
+          {/* Content */}
+          <div className="mx-auto w-full max-w-5xl pt-24 text-center">
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
+
+              {/* Badge */}
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-2 text-sm font-semibold text-violet-400/90 backdrop-blur-md">
+                <Sparkles className="h-3.5 w-3.5" />
+                The world's fastest way to meet
+              </div>
+
+              {/* Headline */}
+              <h1 className="text-5xl font-black leading-[0.92] tracking-[-0.04em] text-white sm:text-7xl lg:text-8xl">
+                Meetings
+                <br />
+                <span className="bg-gradient-to-r from-violet-400 via-fuchsia-400 to-cyan-400 bg-clip-text text-transparent">
+                  without friction.
                 </span>
               </h1>
-              <p className="mx-auto mt-10 max-w-2xl text-xl font-medium text-muted-foreground/80 sm:text-2xl">
-                No accounts. No downloads. Just click, share, and talk.
-                <span className="mt-4 block text-foreground font-bold tracking-tight">
-                  Gather is how modern teams connect.
-                </span>
+
+              {/* Sub */}
+              <p className="mx-auto mt-7 max-w-xl text-base text-white/50 sm:text-lg">
+                No accounts. No downloads. Just click, share&nbsp;&amp;&nbsp;talk.
               </p>
 
-              <div className="mt-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              {/* CTA row */}
+              <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
                 <Button
                   size="lg"
                   disabled={creating}
                   onClick={handleCreateInstant}
-                  className="h-16 rounded-2xl bg-gradient-primary px-10 text-xl font-bold text-primary-foreground shadow-glow transition-all hover:scale-105 hover:opacity-95"
+                  className="group relative h-14 w-full overflow-hidden rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-500 px-10 text-base font-black text-white shadow-lg shadow-violet-500/25 transition-all hover:scale-[1.02] hover:shadow-violet-500/40 active:scale-[0.98] sm:w-auto"
                 >
-                  <Video className="mr-3 h-6 w-6" />
-                  Start meeting
+                  <Video className="mr-2 h-5 w-5" />
+                  {creating ? "Starting…" : "Start meeting"}
+                  {/* shimmer */}
+                  <span className="absolute inset-0 translate-x-[-110%] bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform duration-700 group-hover:translate-x-[110%]" />
                 </Button>
 
-                <div className="flex h-16 items-center gap-3 rounded-2xl border border-white/10 bg-white/5 p-2 backdrop-blur-md focus-within:ring-2 focus-within:ring-primary/50">
-                  <Link2 className="ml-3 h-5 w-5 text-muted-foreground" />
+                <div className="flex h-14 w-full items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 backdrop-blur-md focus-within:ring-1 focus-within:ring-violet-500/50 sm:w-auto">
+                  <Link2 className="h-4 w-4 shrink-0 text-white/30" />
                   <Input
                     value={code}
                     onChange={(e) => setCode(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && handleJoin()}
                     placeholder="Enter room code"
-                    className="h-full border-0 bg-transparent text-lg font-medium placeholder:text-muted-foreground/50 focus-visible:ring-0"
+                    className="h-full border-0 bg-transparent text-sm font-medium text-white placeholder:text-white/30 focus-visible:ring-0 sm:w-44"
                   />
                   <Button
                     onClick={handleJoin}
-                    variant="secondary"
-                    className="h-full rounded-xl px-6 font-bold"
+                    className="h-9 rounded-xl bg-white/10 px-5 text-sm font-bold text-white hover:bg-white/20"
                   >
                     Join
                   </Button>
                 </div>
               </div>
 
-              <div className="mt-8 flex items-center justify-center gap-8 text-xs font-bold uppercase tracking-widest text-muted-foreground/40">
+              {/* Stats strip */}
+              <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 text-[11px] font-bold uppercase tracking-widest text-white/30">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  End-to-End Private
+                  <Shield className="h-3.5 w-3.5 text-violet-400/60" />
+                  Peer-to-peer encrypted
                 </div>
+                <div className="h-1 w-1 rounded-full bg-white/10 sm:block hidden" />
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
+                  <Users className="h-3.5 w-3.5 text-cyan-400/60" />
                   No login required
+                </div>
+                <div className="h-1 w-1 rounded-full bg-white/10 sm:block hidden" />
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-3.5 w-3.5 text-fuchsia-400/60" />
+                  Instant join
                 </div>
               </div>
             </div>
