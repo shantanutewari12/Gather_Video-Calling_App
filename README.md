@@ -93,11 +93,11 @@ Melodic join chimes let you know who arrived — without breaking your flow.
 
 ## 🛠️ Local Development
 
-```bash
+<pre align="center">
 git clone https://github.com/shantanutewari12/app-blueprint.git
 npm install
 npm run dev
-```
+</pre>
 
 ---
 
