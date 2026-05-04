@@ -1,50 +1,17 @@
 <div align="center">
 
-<svg width="600" height="160" viewBox="0 0 600 160" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#a78bfa">
-        <animate attributeName="stop-color" values="#a78bfa;#38bdf8;#a78bfa" dur="4s" repeatCount="indefinite"/>
-      </stop>
-      <stop offset="100%" stop-color="#38bdf8">
-        <animate attributeName="stop-color" values="#38bdf8;#a78bfa;#38bdf8" dur="4s" repeatCount="indefinite"/>
-      </stop>
-    </linearGradient>
-    <filter id="blur"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-  </defs>
+# 📽️ GATHER
 
-  <!-- pulsing ring -->
-  <circle cx="300" cy="75" r="58" fill="none" stroke="url(#g1)" stroke-width="1" opacity="0.3">
-    <animate attributeName="r" values="58;70;58" dur="3s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.3;0.05;0.3" dur="3s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="300" cy="75" r="48" fill="none" stroke="url(#g1)" stroke-width="0.5" opacity="0.2">
-    <animate attributeName="r" values="48;60;48" dur="3s" begin="0.5s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.2;0.05;0.2" dur="3s" begin="0.5s" repeatCount="indefinite"/>
-  </circle>
-
-  <!-- GATHER -->
-  <text x="300" y="95" font-family="'Segoe UI',Arial,sans-serif" font-size="64" font-weight="700"
-    fill="url(#g1)" text-anchor="middle" filter="url(#blur)" letter-spacing="8">GATHER</text>
-
-  <!-- subtitle -->
-  <text x="300" y="128" font-family="'Segoe UI',Arial,sans-serif" font-size="13"
-    fill="#94a3b8" text-anchor="middle" letter-spacing="4">MEETINGS WITHOUT FRICTION</text>
-
-  <!-- animated line -->
-  <rect x="0" y="155" width="600" height="1.5" fill="url(#g1)" rx="1">
-    <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/>
-  </rect>
-</svg>
+### <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=22&pause=1000&color=A78BFA&center=true&vCenter=true&width=500&lines=Meetings+Without+Friction;No+Accounts.+No+Downloads.;Just+Instant+Connection.;Built+for+the+Indian+Tech+Ecosystem+🇮🇳" alt="Typing SVG" />
 
 <br/>
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-Visit%20Now-7c3aed?style=for-the-badge)](https://app-blueprint-tau.vercel.app)
-[![User Guide](https://img.shields.io/badge/User%20Guide-Read%20More-0ea5e9?style=for-the-badge)](#-user-guide)
+[![Live Demo](https://img.shields.io/badge/🚀_LIVE_DEMO-VISIT_NOW-7c3aed?style=for-the-badge)](https://app-blueprint-tau.vercel.app)
+[![User Guide](https://img.shields.io/badge/📖_USER_GUIDE-READ_MORE-0ea5e9?style=for-the-badge)](#-user-guide)
 
 <br/>
 
-> **Gather** — No accounts. No downloads. Just instant peer-to-peer video calls, built for speed.
+> **Gather** — No accounts. No downloads. Instant peer-to-peer video calls built for speed.
 
 <br/>
 
