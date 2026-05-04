@@ -86,6 +86,31 @@ const ICE_SERVERS: RTCConfiguration = {
   iceCandidatePoolSize: 10,
 };
 
+// --- Audio helpers (Web Audio API — no external files needed) ---
+function playChime(ascending: boolean) {
+  try {
+    const ctx = new AudioContext();
+    const freqs = ascending ? [523.25, 659.25, 783.99] : [783.99, 659.25, 523.25];
+    freqs.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.value = freq;
+      const t = ctx.currentTime + i * 0.13;
+      gain.gain.setValueAtTime(0, t);
+      gain.gain.linearRampToValueAtTime(ascending ? 0.25 : 0.18, t + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.001, t + 0.38);
+      osc.start(t);
+      osc.stop(t + 0.4);
+    });
+    setTimeout(() => void ctx.close(), 1800);
+  } catch {
+    /* AudioContext might be blocked before user gesture */
+  }
+}
+
 function makePeerId() {
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
@@ -302,6 +327,12 @@ function RoomPage() {
       pc.onconnectionstatechange = () => {
         if (["failed", "disconnected", "closed"].includes(pc.connectionState)) {
           delete pcsRef.current[remoteId];
+          // Remove tile immediately when connection drops
+          setPeers((p) => {
+            const n = { ...p };
+            delete n[remoteId];
+            return n;
+          });
         }
       };
 
@@ -355,16 +386,14 @@ function RoomPage() {
 
     ch.on("presence", { event: "join" }, ({ key }) => {
       if (key === myId) return;
-      // If we don't have a stream yet, signaling will be incomplete.
-      // But we can still initiate and tracks will be added later if we use transceivers,
-      // but here we just wait or re-sync.
+      playChime(true); // ascending chime = someone joined
       if (myId < key) {
-        // small delay to ensure local media is ready
         setTimeout(() => void createPeer(key, true), 500);
       }
     });
 
     ch.on("presence", { event: "leave" }, ({ key }) => {
+      playChime(false); // descending chime = someone left
       const pc = pcsRef.current[key];
       if (pc) {
         pc.close();
@@ -376,6 +405,10 @@ function RoomPage() {
         return n;
       });
     });
+
+    // Also untrack when user closes/refreshes the tab
+    const handleBeforeUnload = () => void ch.untrack();
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
     // Helper: flush queued ICE candidates after remote description is set
     const flushPendingCandidates = async (remoteId: string, pc: RTCPeerConnection) => {
@@ -451,6 +484,7 @@ function RoomPage() {
     });
 
     return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       Object.values(pcsRef.current).forEach((pc) => pc.close());
       pcsRef.current = {};
       supabase.removeChannel(ch);
@@ -522,20 +556,30 @@ function RoomPage() {
     navigate({ to: "/" });
   };
 
-  // Replace only the video track — keeps existing audio track alive
+  // Replace only the video track — keeps existing audio alive
+  // CRITICAL: replaceTrack MUST happen BEFORE t.stop()
+  // Stopping the track nulls sender.track → find() would miss it
   const swapVideoTrack = useCallback((newVideoTrack: MediaStreamTrack) => {
     if (!streamRef.current) return;
-    streamRef.current.getVideoTracks().forEach((t) => {
+    const oldVideoTracks = streamRef.current.getVideoTracks();
+
+    // 1. Replace in all peer connections FIRST (while old track is still valid)
+    Object.values(pcsRef.current).forEach((pc) => {
+      const sender = pc
+        .getSenders()
+        .find((s) => oldVideoTracks.some((old) => s.track === old) || s.track?.kind === "video");
+      if (sender) void sender.replaceTrack(newVideoTrack);
+    });
+
+    // 2. Now stop old tracks and swap in the MediaStream
+    oldVideoTracks.forEach((t) => {
       t.stop();
       streamRef.current!.removeTrack(t);
     });
     streamRef.current.addTrack(newVideoTrack);
-    setLocalStream(new MediaStream(streamRef.current.getTracks()));
+
+    // 3. Update local preview directly (no state change needed)
     if (videoRef.current) videoRef.current.srcObject = streamRef.current;
-    Object.values(pcsRef.current).forEach((pc) => {
-      const sender = pc.getSenders().find((s) => s.track?.kind === "video");
-      if (sender) void sender.replaceTrack(newVideoTrack);
-    });
   }, []);
 
   const restoreCamera = useCallback(async () => {
