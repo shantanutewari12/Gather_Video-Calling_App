@@ -73,9 +73,9 @@ function Landing() {
     <div className="min-h-screen bg-background text-foreground">
       <SiteHeader />
 
-      <main>
+      <main className="pt-20 sm:pt-24">
         {/* Hero */}
-        <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden px-4 py-12 sm:px-6 lg:px-8">
+        <section className="relative flex min-h-[70vh] items-center justify-center overflow-hidden px-4 py-12 sm:px-6 lg:px-8 sm:py-20">
           {/* Video Background */}
           <div className="absolute inset-0 -z-10 overflow-hidden">
             <video
@@ -96,8 +96,8 @@ function Landing() {
 
           <div className="mx-auto max-w-7xl relative">
             <div className="text-center animate-in fade-in slide-in-from-bottom-10 duration-1000 ease-out">
-              <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-semibold backdrop-blur-md shadow-2xl">
-                <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+              <div className="inline-flex select-none items-center gap-2 rounded-full bg-white/5 px-4 py-1.5 text-sm font-semibold backdrop-blur-md shadow-2xl ring-1 ring-white/10 transition-all hover:bg-white/10">
+                <Sparkles className="h-4 w-4 text-violet-400 animate-pulse" />
                 <span className="bg-gradient-primary bg-clip-text text-transparent">
                   The world's fastest way to meet
                 </span>
@@ -208,16 +208,16 @@ function Landing() {
               {[
                 {
                   quote:
-                    "Gather is our go-to for quick architectural syncs at Zomato. The zero-latency experience is just unmatched.",
-                  author: "Deepinder Goyal",
-                  role: "CEO @ Zomato (Gurgaon)",
-                  avatar: "DG",
+                    "Gather is our go-to for quick architectural syncs at Maruti Suzuki. The zero-latency experience is just unmatched.",
+                  author: "Manas Singh",
+                  role: "Software Engineer - 3 @ Maruti Suzuki",
+                  avatar: "MS",
                 },
                 {
                   quote:
                     "Being in Gurgaon, we handle global teams. Gather makes jumping into a call as easy as sending a WhatsApp message.",
-                  author: "Aman Gupta",
-                  role: "Founder @ boAt Lifestyle",
+                  author: "Abhishek Gupta",
+                  role: "Senior Frontend Engineer @ boAt Lifestyle",
                   avatar: "AG",
                 },
                 {

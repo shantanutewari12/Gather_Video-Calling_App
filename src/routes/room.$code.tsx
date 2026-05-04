@@ -599,18 +599,43 @@ function RoomPage() {
       await restoreCamera();
       return;
     }
+
+    // Check if browser supports screen sharing
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+      toast.error("Screen sharing is not supported on this browser or mobile device.");
+      return;
+    }
+
     try {
-      const screen = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+      // On some mobile devices, constraints like frameRate can help
+      const screen = await navigator.mediaDevices.getDisplayMedia({
+        video: {
+          displaySurface: "monitor",
+          logicalSurface: true,
+          cursor: "always",
+        } as DisplayMediaStreamOptions["video"],
+        audio: false,
+      });
+
       const screenTrack = screen.getVideoTracks()[0];
-      // When user clicks browser's "Stop sharing" button
-      screenTrack.addEventListener("ended", () => {
+      if (!screenTrack) throw new Error("No screen track found");
+
+      // Handle user stopping via browser UI
+      screenTrack.onended = () => {
         setScreenSharing(false);
         void restoreCamera();
-      });
+      };
+
       swapVideoTrack(screenTrack);
       setScreenSharing(true);
-    } catch {
-      toast.error("Screen share cancelled");
+      toast.success("Sharing screen");
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error.name === "NotAllowedError") {
+        toast.error("Permission denied for screen sharing");
+      } else {
+        toast.error("Screen share failed: " + (error.message || "Unknown error"));
+      }
       setScreenSharing(false);
     }
   };
