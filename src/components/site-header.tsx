@@ -11,7 +11,6 @@ export function SiteHeader() {
       <div className="absolute bottom-0 left-0 h-px w-full bg-gradient-to-r from-transparent via-violet-500/60 to-transparent" />
 
       <div className="relative mx-auto flex h-16 w-full max-w-screen-2xl items-center justify-between px-4 sm:px-8 lg:px-16">
-
         {/* ── Logo ── */}
         <Link to="/" className="group flex items-center gap-3 select-none">
           <div className="relative flex h-9 w-9 shrink-0 items-center justify-center">
@@ -45,7 +44,7 @@ export function SiteHeader() {
         {/* ── Right nav ── */}
         <nav className="flex items-center gap-2 sm:gap-4">
           {/* Status chip — hidden on mobile */}
-          <div className="hidden items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/5 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-400/70 sm:flex">
+          <div className="hidden items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/15 px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest text-violet-300 sm:flex">
             Beta
           </div>
 

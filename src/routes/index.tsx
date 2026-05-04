@@ -342,19 +342,11 @@ function Landing() {
               </div>
               <span className="text-lg font-black tracking-tight">Gather</span>
             </div>
-            <div className="flex gap-8 text-sm font-medium text-muted-foreground">
-              <a href="#" className="hover:text-foreground">
-                Terms
-              </a>
-              <a href="#" className="hover:text-foreground">
-                Privacy
-              </a>
-              <a href="#" className="hover:text-foreground">
-                Security
-              </a>
-              <a href="#" className="hover:text-foreground">
-                Open Source
-              </a>
+            <div className="flex flex-wrap justify-center gap-6 text-sm font-medium text-muted-foreground">
+              <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+              <Link to="/security" className="hover:text-foreground transition-colors">Security</Link>
+              <Link to="/report-bug" className="hover:text-violet-400 transition-colors">Report Bug 🐛</Link>
             </div>
             <div className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} Gather Technologies.

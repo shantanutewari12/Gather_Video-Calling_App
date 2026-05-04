@@ -770,7 +770,7 @@ function RoomPage() {
     totalTiles <= 1
       ? "grid-cols-1"
       : totalTiles === 2
-        ? "grid-cols-1 sm:grid-cols-2" // Always side-by-side on sm+
+        ? "grid-cols-2" // Always side-by-side, even on mobile
         : totalTiles <= 4
           ? "grid-cols-2"
           : totalTiles <= 9
