@@ -251,19 +251,22 @@ function Landing() {
         </section>
 
         {/* Features Grid */}
-        <section className="py-24">
+        <section className="py-16 sm:py-24">
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+            <div className="flex flex-col gap-12 lg:grid lg:grid-cols-2 lg:items-center lg:gap-16">
+              {/* Text side */}
               <div>
-                <h2 className="text-4xl font-black leading-tight sm:text-6xl">
-                  Built for the <br />
-                  <span className="text-primary">speed of thought.</span>
+                <h2 className="text-3xl font-black leading-tight sm:text-5xl lg:text-6xl">
+                  Built for the{" "}
+                  <span className="bg-gradient-to-r from-violet-500 to-cyan-400 bg-clip-text text-transparent">
+                    speed of thought.
+                  </span>
                 </h2>
-                <p className="mt-6 text-xl text-muted-foreground leading-relaxed">
+                <p className="mt-4 text-base text-muted-foreground leading-relaxed sm:mt-6 sm:text-xl">
                   We've optimized every single millisecond of the experience. From the moment you
                   land on the page to the first 'hello', Gather stays out of your way.
                 </p>
-                <div className="mt-10 space-y-6">
+                <div className="mt-8 space-y-4 sm:mt-10 sm:space-y-6">
                   {[
                     {
                       title: "One-Click Rooms",
@@ -278,27 +281,38 @@ function Landing() {
                       desc: "Works on every browser and device. No exceptions.",
                     },
                   ].map((item, i) => (
-                    <div key={i} className="flex gap-4">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-success/20 text-success">
-                        <Check className="h-5 w-5" />
+                    <div key={i} className="flex gap-3 sm:gap-4">
+                      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-emerald-400 sm:h-8 sm:w-8">
+                        <Check className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold">{item.title}</h3>
-                        <p className="text-muted-foreground">{item.desc}</p>
+                        <h3 className="text-base font-bold sm:text-lg">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground sm:text-base">{item.desc}</p>
                       </div>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="mt-12 space-y-4">
-                  <div className="aspect-square rounded-[2rem] bg-primary/20 blur-sm" />
-                  <div className="aspect-[4/3] rounded-[2rem] bg-secondary/10" />
-                </div>
-                <div className="space-y-4">
-                  <div className="aspect-[4/3] rounded-[2rem] bg-success/10" />
-                  <div className="aspect-square rounded-[2rem] bg-warning/20 blur-sm" />
-                </div>
+
+              {/* Visual side — feature cards grid, looks great on all screens */}
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                {[
+                  { icon: "⚡", label: "< 2s to join", sub: "World's fastest" },
+                  { icon: "🔒", label: "E2E Private", sub: "No data stored" },
+                  { icon: "📱", label: "Any Device", sub: "Mobile · Desktop" },
+                  { icon: "🎙️", label: "HD Audio", sub: "Noise cancelled" },
+                ].map((card, i) => (
+                  <div
+                    key={i}
+                    className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all hover:-translate-y-1 hover:bg-white/10 sm:rounded-3xl sm:p-6"
+                  >
+                    <span className="text-2xl sm:text-3xl">{card.icon}</span>
+                    <div>
+                      <div className="text-sm font-bold text-white sm:text-base">{card.label}</div>
+                      <div className="text-xs text-muted-foreground sm:text-sm">{card.sub}</div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -308,13 +322,12 @@ function Landing() {
       <footer className="border-t border-white/10 bg-black/20 py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col items-center justify-between gap-6 sm:flex-row">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-lg bg-gradient-primary p-0.5">
-                <div className="h-full w-full rounded-[6px] bg-background flex items-center justify-center">
-                  <img src={logo} alt="Gather" className="h-5 w-5" />
-                </div>
+            <div className="flex items-center gap-2.5">
+              <div className="relative flex h-9 w-9 items-center justify-center">
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-violet-600 to-cyan-500 opacity-60 blur-sm" />
+                <img src={logo} alt="Gather" className="relative h-9 w-9 rounded-xl object-cover" />
               </div>
-              <span className="text-xl font-black tracking-tighter">Gather</span>
+              <span className="text-lg font-black tracking-tight">Gather</span>
             </div>
             <div className="flex gap-8 text-sm font-medium text-muted-foreground">
               <a href="#" className="hover:text-foreground">
