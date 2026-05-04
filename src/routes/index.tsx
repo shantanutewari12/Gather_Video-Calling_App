@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   Video,
@@ -76,10 +76,15 @@ function Landing() {
       <main>
         {/* ─── Hero ─────────────────────────────────────────── */}
         <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 sm:px-6 lg:px-8">
-
           {/* Full-screen video background */}
           <div className="absolute inset-0 -z-20">
-            <video autoPlay loop muted playsInline className="h-full w-full object-cover opacity-20">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              className="h-full w-full object-cover opacity-20"
+            >
               <source
                 src="https://assets.mixkit.co/videos/preview/mixkit-abstract-flowing-purple-and-blue-gradient-background-video-41227-large.mp4"
                 type="video/mp4"
@@ -98,7 +103,6 @@ function Landing() {
           {/* Content */}
           <div className="mx-auto w-full max-w-5xl pt-24 text-center">
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-700 ease-out">
-
               {/* Badge */}
               <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-violet-500/20 bg-violet-500/5 px-4 py-2 text-sm font-semibold text-violet-400/90 backdrop-blur-md">
                 <Sparkles className="h-3.5 w-3.5" />
@@ -343,10 +347,18 @@ function Landing() {
               <span className="text-lg font-black tracking-tight">Gather</span>
             </div>
             <div className="flex flex-wrap justify-center gap-6 text-sm font-medium text-muted-foreground">
-              <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
-              <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
-              <Link to="/security" className="hover:text-foreground transition-colors">Security</Link>
-              <Link to="/report-bug" className="hover:text-violet-400 transition-colors">Report Bug 🐛</Link>
+              <Link to="/terms" className="hover:text-foreground transition-colors">
+                Terms
+              </Link>
+              <Link to="/privacy" className="hover:text-foreground transition-colors">
+                Privacy
+              </Link>
+              <Link to="/security" className="hover:text-foreground transition-colors">
+                Security
+              </Link>
+              <Link to="/report-bug" className="hover:text-violet-400 transition-colors">
+                Report Bug 🐛
+              </Link>
             </div>
             <div className="text-sm text-muted-foreground">
               © {new Date().getFullYear()} Gather Technologies.

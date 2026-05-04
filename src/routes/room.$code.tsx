@@ -657,7 +657,8 @@ function RoomPage() {
   }
 
   // Detect mobile for screen share
-  const isMobile = typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const isMobile =
+    typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 
   // Pre-join lobby
   if (!joined) {
@@ -665,7 +666,10 @@ function RoomPage() {
       <div className="flex min-h-screen flex-col bg-call-bg text-white">
         {/* Lobby Header */}
         <header className="flex items-center justify-between border-b border-white/5 px-4 py-3 backdrop-blur-xl">
-          <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-white">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-sm font-semibold text-white/80 hover:text-white"
+          >
             <img src={logo} alt="Gather" width={28} height={28} className="h-7 w-7 rounded-lg" />
             <span className="font-black tracking-tight">Gather</span>
           </Link>
@@ -673,7 +677,11 @@ function RoomPage() {
             onClick={copyLink}
             className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-mono hover:bg-white/10 transition-all"
           >
-            {linkCopied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+            {linkCopied ? (
+              <Check className="h-3.5 w-3.5 text-emerald-400" />
+            ) : (
+              <Copy className="h-3.5 w-3.5" />
+            )}
             {roomCode}
           </button>
         </header>
@@ -708,7 +716,9 @@ function RoomPage() {
 
           {/* Right: Meeting Info + Join Form */}
           <div className="w-full max-w-sm">
-            <div className="mb-1 text-xs font-bold uppercase tracking-widest text-white/30">Meeting</div>
+            <div className="mb-1 text-xs font-bold uppercase tracking-widest text-white/30">
+              Meeting
+            </div>
             <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
               {meeting?.title}
             </h1>
@@ -979,7 +989,11 @@ function RoomPage() {
           </ControlBtn>
           <ControlBtn
             active={!screenSharing}
-            onClick={isMobile ? () => toast.info("Screen sharing is not available on mobile browsers.") : toggleScreenShare}
+            onClick={
+              isMobile
+                ? () => toast.info("Screen sharing is not available on mobile browsers.")
+                : toggleScreenShare
+            }
             label={isMobile ? "Screen share unavailable on mobile" : "Share screen"}
           >
             <MonitorUp className={cn("h-5 w-5", isMobile && "opacity-40")} />
