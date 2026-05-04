@@ -74,7 +74,16 @@ export const Route = createFileRoute("/room/$code")({
 
 const REACTIONS = ["👍", "❤️", "😂", "🎉", "👏", "🙌"];
 const ICE_SERVERS: RTCConfiguration = {
-  iceServers: [{ urls: "stun:stun.l.google.com:19302" }, { urls: "stun:stun1.l.google.com:19302" }],
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
+    { urls: "stun:stun2.l.google.com:19302" },
+    { urls: "stun:stun3.l.google.com:19302" },
+    { urls: "stun:stun4.l.google.com:19302" },
+    { urls: "stun:stun.ekiga.net" },
+    { urls: "stun:stun.stunprotocol.org:3478" },
+  ],
+  iceCandidatePoolSize: 10,
 };
 
 function makePeerId() {
@@ -111,6 +120,8 @@ function RoomPage() {
   const streamRef = useRef<MediaStream | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const pcsRef = useRef<Record<string, RTCPeerConnection>>({});
+  // Queue ICE candidates that arrive before setRemoteDescription
+  const pendingCandidatesRef = useRef<Record<string, RTCIceCandidateInit[]>>({});
 
   const senderName = useMemo(() => guestName || "Guest", [guestName]);
 
@@ -182,52 +193,42 @@ function RoomPage() {
     };
   }, [meeting]);
 
-  const initStream = useCallback(
-    async (cancelled = false) => {
+  // STABLE - no deps so it never re-runs due to mic/cam toggles
+  // mic/cam state is handled by the separate effects below
+  const initStream = useCallback(async () => {
+    if (streamRef.current) {
+      setLocalStream(streamRef.current);
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: "user" },
+        audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 48000 },
+      });
+      setLocalStream(stream);
+      streamRef.current = stream;
+    } catch (err) {
+      console.error("Camera access error:", err);
       try {
-        if (streamRef.current) {
-          setLocalStream(streamRef.current);
-          return;
-        }
-
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-          audio: true,
+        // Fallback: audio only
+        const audioStream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true },
         });
-        if (cancelled) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
-        }
-        setLocalStream(stream);
-        streamRef.current = stream;
-
-        stream.getAudioTracks().forEach((t) => (t.enabled = micOn));
-        stream.getVideoTracks().forEach((t) => (t.enabled = camOn));
-      } catch (err) {
-        console.error("Camera access error:", err);
-        try {
-          const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-          if (!cancelled) {
-            setLocalStream(audioStream);
-            streamRef.current = audioStream;
-            setCamOn(false);
-          }
-        } catch {
-          toast.error("Camera/mic blocked", {
-            description: "Please allow media permissions in your browser settings.",
-          });
-        }
+        setLocalStream(audioStream);
+        streamRef.current = audioStream;
+        setCamOn(false);
+      } catch {
+        toast.error("Camera/mic blocked", {
+          description: "Please allow media permissions in your browser settings.",
+        });
       }
-    },
-    [micOn, camOn],
-  );
+    }
+  }, []); // Empty deps — STABLE, runs once on mount
 
   useEffect(() => {
-    let cancelled = false;
-    void initStream(cancelled);
-
+    void initStream();
+    // Only stop tracks on full component unmount
     return () => {
-      cancelled = true;
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     };
@@ -376,10 +377,22 @@ function RoomPage() {
       });
     });
 
+    // Helper: flush queued ICE candidates after remote description is set
+    const flushPendingCandidates = async (remoteId: string, pc: RTCPeerConnection) => {
+      const pending = pendingCandidatesRef.current[remoteId] ?? [];
+      delete pendingCandidatesRef.current[remoteId];
+      for (const candidate of pending) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch { /* ignore */ }
+      }
+    };
+
     ch.on("broadcast", { event: "offer" }, async ({ payload }) => {
       if (payload.to !== myId) return;
       const pc = await createPeer(payload.from, false);
       await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+      await flushPendingCandidates(payload.from, pc);
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       ch.send({
@@ -392,19 +405,27 @@ function RoomPage() {
     ch.on("broadcast", { event: "answer" }, async ({ payload }) => {
       if (payload.to !== myId) return;
       const pc = pcsRef.current[payload.from];
-      if (pc) await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+      if (pc) {
+        await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+        await flushPendingCandidates(payload.from, pc);
+      }
     });
 
     ch.on("broadcast", { event: "ice" }, async ({ payload }) => {
       if (payload.to !== myId) return;
       const pc = pcsRef.current[payload.from];
-      if (pc) {
-        try {
-          await pc.addIceCandidate(new RTCIceCandidate(payload.candidate));
-        } catch {
-          /* ignore */
+      if (!pc) return;
+      // If remote description isn't set yet, queue the candidate
+      if (!pc.remoteDescription) {
+        if (!pendingCandidatesRef.current[payload.from]) {
+          pendingCandidatesRef.current[payload.from] = [];
         }
+        pendingCandidatesRef.current[payload.from].push(payload.candidate as RTCIceCandidateInit);
+        return;
       }
+      try {
+        await pc.addIceCandidate(new RTCIceCandidate(payload.candidate as RTCIceCandidateInit));
+      } catch { /* ignore */ }
     });
 
     ch.on("broadcast", { event: "reaction" }, ({ payload }) => {
