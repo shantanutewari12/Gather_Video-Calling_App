@@ -1,9 +1,9 @@
 import { createContext, useContext, type ReactNode } from "react";
 
 interface AuthContextValue {
-  user: null;
-  session: null;
-  loading: false;
+  user: { id: string } | null;
+  session: any | null;
+  loading: boolean;
   signOut: () => Promise<void>;
 }
 

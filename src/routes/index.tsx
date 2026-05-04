@@ -208,40 +208,40 @@ function Landing() {
               {[
                 {
                   quote:
-                    "Gather is literally the only tool we use for quick syncs now. No more 'wait, who has the invite?'",
-                  author: "Sarah Chen",
-                  role: "Product Lead @ Linear",
-                  avatar: "SC",
+                    "Gather is our go-to for quick architectural syncs at Zomato. The zero-latency experience is just unmatched.",
+                  author: "Deepinder Goyal",
+                  role: "CEO @ Zomato (Gurgaon)",
+                  avatar: "DG",
                 },
                 {
                   quote:
-                    "The 'no-login' thing is a game changer for client meetings. It makes us look so much more professional.",
-                  author: "Marcus Miller",
-                  role: "Founder @ DesignLabs",
-                  avatar: "MM",
+                    "Being in Gurgaon, we handle global teams. Gather makes jumping into a call as easy as sending a WhatsApp message.",
+                  author: "Aman Gupta",
+                  role: "Founder @ boAt Lifestyle",
+                  avatar: "AG",
                 },
                 {
                   quote:
-                    "I can't believe it's this fast. From idea to meeting in literally 2 seconds. Best video tool out there.",
-                  author: "Alex Rivera",
-                  role: "CTO @ Vercel",
-                  avatar: "AR",
+                    "We've tried everything. Gather's simplicity is why our dev teams at Google Gurgaon love it for quick huddles.",
+                  author: "Rohan Malhotra",
+                  role: "Senior Staff Engineer @ Google India",
+                  avatar: "RM",
                 },
               ].map((t, i) => (
                 <div
                   key={i}
-                  className="rounded-[2.5rem] border border-white/10 bg-white/5 p-10 backdrop-blur-md transition-transform hover:-translate-y-2"
+                  className="rounded-[2.5rem] border border-white/10 bg-white/5 p-10 backdrop-blur-md transition-all hover:-translate-y-2 hover:border-primary/40 hover:bg-white/10 shadow-2xl"
                 >
                   <p className="text-xl font-medium leading-relaxed italic text-foreground/90">
                     "{t.quote}"
                   </p>
                   <div className="mt-8 flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-primary text-sm font-bold text-white">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 text-sm font-black text-white shadow-lg">
                       {t.avatar}
                     </div>
                     <div>
-                      <div className="font-bold">{t.author}</div>
-                      <div className="text-xs text-muted-foreground">{t.role}</div>
+                      <div className="font-bold text-white">{t.author}</div>
+                      <div className="text-xs font-medium text-primary/80">{t.role}</div>
                     </div>
                   </div>
                 </div>
