@@ -281,21 +281,42 @@ function RoomPage() {
     if (!joined || !meeting) return;
     const myId = peerIdRef.current;
 
+    // Helper: flush queued ICE candidates after remote description is set
+    const flushPendingCandidates = async (remoteId: string, pc: RTCPeerConnection) => {
+      const pending = pendingCandidatesRef.current[remoteId] ?? [];
+      delete pendingCandidatesRef.current[remoteId];
+      for (const candidate of pending) {
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+        } catch {
+          /* ignore stale candidates */
+        }
+      }
+    };
+
     const createPeer = async (remoteId: string, initiator: boolean) => {
-      if (pcsRef.current[remoteId]) return pcsRef.current[remoteId];
+      // If a healthy PC already exists, reuse it
+      const existing = pcsRef.current[remoteId];
+      if (existing && !["failed", "closed"].includes(existing.connectionState)) {
+        return existing;
+      }
+      // Close any stale connection first
+      if (existing) {
+        existing.close();
+        delete pcsRef.current[remoteId];
+      }
+
       const pc = new RTCPeerConnection(ICE_SERVERS);
       pcsRef.current[remoteId] = pc;
 
-      // Add tracks from current stream
+      // Add local tracks so the remote side receives our stream
       const currentStream = streamRef.current;
       if (currentStream) {
-        currentStream.getTracks().forEach((track) => {
-          pc.addTrack(track, currentStream);
-        });
+        currentStream.getTracks().forEach((track) => pc.addTrack(track, currentStream));
       }
 
       pc.ontrack = (e) => {
-        const [remoteStream] = e.streams;
+        const remoteStream = e.streams[0] ?? new MediaStream([e.track]);
         setPeers((p) => {
           if (p[remoteId]?.stream === remoteStream) return p;
           return {
@@ -326,9 +347,13 @@ function RoomPage() {
 
       pc.onconnectionstatechange = () => {
         if (["failed", "disconnected", "closed"].includes(pc.connectionState)) {
-          delete pcsRef.current[remoteId];
+          // Only remove if this PC is still the current one
+          if (pcsRef.current[remoteId] === pc) {
+            delete pcsRef.current[remoteId];
+          }
           // Remove tile immediately when connection drops
           setPeers((p) => {
+            if (!p[remoteId]) return p;
             const n = { ...p };
             delete n[remoteId];
             return n;
@@ -355,7 +380,6 @@ function RoomPage() {
 
     ch.on("presence", { event: "sync" }, () => {
       const state = ch.presenceState() as Record<string, PresenceState[]>;
-      // Build next from presence state, but DON'T include stream yet
       const next: Record<string, Omit<RemotePeer, "stream">> = {};
       Object.entries(state).forEach(([key, metas]) => {
         if (key === myId) return;
@@ -370,70 +394,71 @@ function RoomPage() {
       });
       setPeers((prev) => {
         const merged: Record<string, RemotePeer> = {};
-        // Only update presence metadata; ALWAYS preserve stream from prev state
+        // Update metadata but preserve existing streams
         Object.keys(next).forEach((k) => {
-          merged[k] = {
-            ...next[k],
-            stream: prev[k]?.stream, // CRITICAL: never drop the stream
-          };
+          merged[k] = { ...next[k], stream: prev[k]?.stream };
         });
-        // Close connections for peers that truly left
+        // Close connections for peers that left
         Object.keys(prev).forEach((k) => {
           if (!next[k]) {
-            if (pcsRef.current[k]) {
-              pcsRef.current[k].close();
+            const pc = pcsRef.current[k];
+            if (pc) {
+              pc.close();
               delete pcsRef.current[k];
             }
-            // Don't add to merged → peer is removed from UI
           }
         });
         return merged;
       });
     });
 
-    ch.on("presence", { event: "join" }, ({ key }) => {
+    ch.on("presence", { event: "join" }, ({ key, newPresences }) => {
       if (key === myId) return;
-      playChime(true); // ascending chime = someone joined
+      // Update peer metadata immediately on join
+      const meta = (newPresences as unknown as PresenceState[])[0];
+      if (meta) {
+        setPeers((p) => ({
+          ...p,
+          [key]: {
+            peerId: key,
+            name: meta.name ?? "Guest",
+            micOn: meta.micOn ?? true,
+            camOn: meta.camOn ?? true,
+            handRaised: meta.handRaised ?? false,
+            stream: p[key]?.stream,
+          },
+        }));
+      }
+      playChime(true);
+      // Lower peer ID initiates to avoid duplicate offers
       if (myId < key) {
-        setTimeout(() => void createPeer(key, true), 500);
+        setTimeout(() => void createPeer(key, true), 600);
       }
     });
 
     ch.on("presence", { event: "leave" }, ({ key }) => {
-      playChime(false); // descending chime = someone left
-      // Immediately close the peer connection
-      if (pcsRef.current[key]) {
-        pcsRef.current[key].close();
+      playChime(false);
+      const pc = pcsRef.current[key];
+      if (pc) {
+        pc.close();
         delete pcsRef.current[key];
       }
-      // Immediately remove from UI — no delay
+      // Immediately remove from UI
       setPeers((p) => {
+        if (!p[key]) return p;
         const n = { ...p };
         delete n[key];
         return n;
       });
     });
 
-    // Also untrack when user closes/refreshes the tab
     const handleBeforeUnload = () => void ch.untrack();
     window.addEventListener("beforeunload", handleBeforeUnload);
-
-    // Helper: flush queued ICE candidates after remote description is set
-    const flushPendingCandidates = async (remoteId: string, pc: RTCPeerConnection) => {
-      const pending = pendingCandidatesRef.current[remoteId] ?? [];
-      delete pendingCandidatesRef.current[remoteId];
-      for (const candidate of pending) {
-        try {
-          await pc.addIceCandidate(new RTCIceCandidate(candidate));
-        } catch {
-          /* ignore */
-        }
-      }
-    };
 
     ch.on("broadcast", { event: "offer" }, async ({ payload }) => {
       if (payload.to !== myId) return;
       const pc = await createPeer(payload.from, false);
+      if (pc.remoteDescription) return; // already handled
       await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
       await flushPendingCandidates(payload.from, pc);
       const answer = await pc.createAnswer();
@@ -448,7 +473,7 @@ function RoomPage() {
     ch.on("broadcast", { event: "answer" }, async ({ payload }) => {
       if (payload.to !== myId) return;
       const pc = pcsRef.current[payload.from];
-      if (pc) {
+      if (pc && !pc.remoteDescription) {
         await pc.setRemoteDescription(new RTCSessionDescription(payload.sdp));
         await flushPendingCandidates(payload.from, pc);
       }
@@ -458,11 +483,8 @@ function RoomPage() {
       if (payload.to !== myId) return;
       const pc = pcsRef.current[payload.from];
       if (!pc) return;
-      // If remote description isn't set yet, queue the candidate
       if (!pc.remoteDescription) {
-        if (!pendingCandidatesRef.current[payload.from]) {
-          pendingCandidatesRef.current[payload.from] = [];
-        }
+        pendingCandidatesRef.current[payload.from] ??= [];
         pendingCandidatesRef.current[payload.from].push(payload.candidate as RTCIceCandidateInit);
         return;
       }
@@ -495,6 +517,7 @@ function RoomPage() {
       window.removeEventListener("beforeunload", handleBeforeUnload);
       Object.values(pcsRef.current).forEach((pc) => pc.close());
       pcsRef.current = {};
+      void ch.untrack();
       supabase.removeChannel(ch);
       channelRef.current = null;
     };
@@ -773,17 +796,16 @@ function RoomPage() {
   }
 
   const peerList = Object.values(peers);
-  // Only count real peers (not the waiting placeholder)
-  const realPeerCount = peerList.length;
-  const totalTiles = realPeerCount + 1; // +1 for local
+  const totalTiles = peerList.length + 1; // +1 for local
+  // Responsive grid: always side-by-side when 2+ participants
   const gridCols =
-    totalTiles <= 1
-      ? "grid-cols-1"
+    totalTiles === 1
+      ? "grid-cols-1 max-w-2xl mx-auto"
       : totalTiles === 2
-        ? "grid-cols-2" // Always side-by-side, even on mobile
+        ? "grid-cols-2"
         : totalTiles <= 4
           ? "grid-cols-2"
-          : totalTiles <= 9
+          : totalTiles <= 6
             ? "grid-cols-2 md:grid-cols-3"
             : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
 
@@ -821,8 +843,25 @@ function RoomPage() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="relative flex-1 p-4 overflow-y-auto custom-scrollbar">
-          <div className={cn("mx-auto grid max-w-4xl gap-6", gridCols)}>
+        <div className="relative flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-4">
+          {/* Empty state — shown as overlay, not inside grid */}
+          {peerList.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <div className="flex flex-col items-center gap-3 text-center text-white/50 pointer-events-auto">
+                <Users className="h-10 w-10 opacity-30" />
+                <p className="text-sm px-4">Share the invite to let others join.</p>
+                <Button
+                  size="sm"
+                  onClick={() => setShowShare(true)}
+                  className="bg-gradient-primary text-primary-foreground"
+                >
+                  <Share2 className="mr-1.5 h-3.5 w-3.5" />
+                  Share invite
+                </Button>
+              </div>
+            </div>
+          )}
+          <div className={cn("grid gap-3 sm:gap-4 w-full", gridCols)}>
             <Tile name={`${senderName} (You)`} accent="bg-primary">
               <video
                 ref={videoRef}
@@ -846,25 +885,6 @@ function RoomPage() {
                 </div>
               )}
             </Tile>
-
-            {peerList.length === 0 && (
-              <Tile name="Waiting for others">
-                <div className="flex h-full flex-col items-center justify-center gap-3 text-center text-white/60">
-                  <Users className="h-10 w-10 opacity-40" />
-                  <p className="px-4 text-sm">
-                    You're the only one here. Share the invite link to let others join.
-                  </p>
-                  <Button
-                    size="sm"
-                    onClick={() => setShowShare(true)}
-                    className="bg-gradient-primary text-primary-foreground"
-                  >
-                    <Share2 className="mr-1.5 h-3.5 w-3.5" />
-                    Share invite
-                  </Button>
-                </div>
-              </Tile>
-            )}
 
             {peerList.map((p) => (
               <Tile key={p.peerId} name={p.name}>

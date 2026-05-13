@@ -37,12 +37,16 @@ function SecurityPage() {
   return (
     <div className="min-h-screen bg-background text-foreground">
       <div className="mx-auto max-w-4xl px-4 py-24 sm:px-6 lg:px-8">
-        <Link to="/" className="mb-10 inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300">
+        <Link
+          to="/"
+          className="mb-10 inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300"
+        >
           ← Back to Gather
         </Link>
         <h1 className="text-4xl font-black tracking-tight">Security</h1>
         <p className="mt-3 max-w-2xl text-lg text-white/60">
-          Gather is built with security as a first principle — not an afterthought. Here's exactly how we protect you.
+          Gather is built with security as a first principle — not an afterthought. Here&apos;s
+          exactly how we protect you.
         </p>
 
         <div className="mt-14 space-y-6">
