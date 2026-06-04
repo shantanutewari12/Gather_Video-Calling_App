@@ -1,0 +1,18 @@
+{
+  "name": "Gather Video Call",
+  "short_name": "Gather",
+  "description": "Meetings without friction. P2P video conferencing.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#16161a",
+  "theme_color": "#7210fa",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

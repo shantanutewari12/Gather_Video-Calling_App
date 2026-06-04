@@ -17,6 +17,7 @@ import {
   Share2,
   Mail,
   Check,
+  MoreVertical,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -132,6 +133,7 @@ function RoomPage() {
   const [showChat, setShowChat] = useState(false);
   const [showPeople, setShowPeople] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [reactions, setReactions] = useState<{ id: number; emoji: string }[]>([]);
 
@@ -149,6 +151,32 @@ function RoomPage() {
   const pendingCandidatesRef = useRef<Record<string, RTCIceCandidateInit[]>>({});
 
   const senderName = useMemo(() => guestName || "Guest", [guestName]);
+
+  const peerList = useMemo(() => Object.values(peers), [peers]);
+  const totalTiles = useMemo(() => peerList.length + 1, [peerList]);
+
+  const tileAspect = useMemo(() => {
+    if (totalTiles === 1) {
+      return "aspect-[3/4] sm:aspect-video max-h-[70vh] sm:max-h-none";
+    } else if (totalTiles === 2) {
+      return "aspect-[4/3] sm:aspect-video";
+    } else {
+      return "aspect-square sm:aspect-video";
+    }
+  }, [totalTiles]);
+
+  const isMobile = useMemo(() => {
+    return typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  }, []);
+
+  const isNonSecureRemote = useMemo(() => {
+    return (
+      typeof window !== "undefined" &&
+      window.location.protocol === "http:" &&
+      window.location.hostname !== "localhost" &&
+      window.location.hostname !== "127.0.0.1"
+    );
+  }, []);
 
   const shareUrl = typeof window !== "undefined" ? window.location.href : "";
 
@@ -679,9 +707,7 @@ function RoomPage() {
     );
   }
 
-  // Detect mobile for screen share
-  const isMobile =
-    typeof navigator !== "undefined" && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
 
   // Pre-join lobby
   if (!joined) {
@@ -708,6 +734,21 @@ function RoomPage() {
             {roomCode}
           </button>
         </header>
+
+        {isNonSecureRemote && (
+          <div className="mx-auto mt-6 w-full max-w-md px-4 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="rounded-2xl border border-amber-500/20 bg-amber-500/10 p-4 text-amber-300 backdrop-blur-md flex items-start gap-3 shadow-lg">
+              <span className="text-xl">⚠️</span>
+              <div>
+                <h4 className="font-bold text-sm text-amber-200">HTTPS Connection Required</h4>
+                <p className="mt-1 text-xs leading-relaxed text-white/60">
+                  WebRTC requires **HTTPS** to access your camera/mic on mobile or remote devices. 
+                  Please run the app over HTTPS (e.g. using ngrok or deploying to Vercel/Netlify) to test from your phone.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Lobby Body — Side by side on desktop, stacked on mobile */}
         <div className="flex flex-1 flex-col items-center justify-center gap-6 px-4 py-8 sm:flex-row sm:items-center sm:justify-center sm:gap-10 sm:py-0">
@@ -795,16 +836,14 @@ function RoomPage() {
     );
   }
 
-  const peerList = Object.values(peers);
-  const totalTiles = peerList.length + 1; // +1 for local
   // Responsive grid: always side-by-side when 2+ participants
   const gridCols =
     totalTiles === 1
-      ? "grid-cols-1 max-w-2xl mx-auto"
+      ? "grid-cols-1 max-w-md sm:max-w-2xl mx-auto"
       : totalTiles === 2
-        ? "grid-cols-2"
+        ? "grid-cols-1 sm:grid-cols-2 max-w-md sm:max-w-none mx-auto"
         : totalTiles <= 4
-          ? "grid-cols-2"
+          ? "grid-cols-2 max-w-2xl sm:max-w-none mx-auto"
           : totalTiles <= 6
             ? "grid-cols-2 md:grid-cols-3"
             : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4";
@@ -862,7 +901,7 @@ function RoomPage() {
             </div>
           )}
           <div className={cn("grid gap-3 sm:gap-4 w-full", gridCols)}>
-            <Tile name={`${senderName} (You)`} accent="bg-primary">
+            <Tile name={`${senderName} (You)`} accent="bg-primary" aspect={tileAspect}>
               <video
                 ref={videoRef}
                 autoPlay
@@ -887,7 +926,7 @@ function RoomPage() {
             </Tile>
 
             {peerList.map((p) => (
-              <Tile key={p.peerId} name={p.name}>
+              <Tile key={p.peerId} name={p.name} aspect={tileAspect}>
                 <PeerVideo peer={p} />
                 {!p.micOn && (
                   <div className="absolute right-2 top-2 rounded-full bg-destructive p-1.5">
@@ -917,7 +956,7 @@ function RoomPage() {
         </div>
 
         {(showChat || showPeople) && (
-          <aside className="hidden w-80 shrink-0 flex-col border-l border-white/5 bg-call-tile/40 md:flex">
+          <aside className="flex w-full md:w-80 shrink-0 flex-col bg-call-tile/95 md:bg-call-tile/40 backdrop-blur-xl md:backdrop-blur-none z-45 fixed inset-y-0 right-0 md:relative md:border-l border-white/5 animate-in slide-in-from-right duration-200">
             <div className="flex items-center justify-between border-b border-white/5 px-4 py-3">
               <span className="font-medium">{showChat ? "Chat" : "People"}</span>
               <button
@@ -988,11 +1027,82 @@ function RoomPage() {
         )}
       </div>
 
+      {showMoreMenu && (
+        <div className="absolute bottom-20 left-4 right-4 z-40 rounded-[2rem] border border-white/10 bg-call-tile/95 p-4 backdrop-blur-xl shadow-elevated animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="flex items-center justify-between border-b border-white/5 pb-2 mb-3">
+            <span className="text-xs font-bold uppercase tracking-widest text-white/40">More Options</span>
+            <button onClick={() => setShowMoreMenu(false)} className="text-white/60 hover:text-white">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          
+          {/* Reactions Row */}
+          <div className="flex justify-around items-center bg-white/5 rounded-2xl p-2 mb-4">
+            {REACTIONS.map((r) => (
+              <button
+                key={r}
+                onClick={() => {
+                  sendReaction(r);
+                  setShowMoreMenu(false);
+                }}
+                className="text-2xl transition hover:scale-125 p-1"
+              >
+                {r}
+              </button>
+            ))}
+          </div>
+
+          {/* Control Buttons Grid */}
+          <div className="grid grid-cols-3 gap-3">
+            <button
+              onClick={() => {
+                setShowMoreMenu(false);
+                if (isMobile) {
+                  toast.info("Screen sharing is not available on mobile browsers.");
+                } else {
+                  void toggleScreenShare();
+                }
+              }}
+              className="flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-white/5 border border-white/10 py-3 text-center transition hover:bg-white/10"
+            >
+              <MonitorUp className={cn("h-5 w-5 text-white/80", isMobile && "opacity-40")} />
+              <span className="text-[10px] font-bold text-white/80">Share Screen</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setShowMoreMenu(false);
+                setShowChat(true);
+                setShowPeople(false);
+              }}
+              className="flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-white/5 border border-white/10 py-3 text-center transition hover:bg-white/10"
+            >
+              <MessageSquare className="h-5 w-5 text-white/80" />
+              <span className="text-[10px] font-bold text-white/80">Open Chat</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setShowMoreMenu(false);
+                setShowPeople(true);
+                setShowChat(false);
+              }}
+              className="flex flex-col items-center justify-center gap-1.5 rounded-2xl bg-white/5 border border-white/10 py-3 text-center transition hover:bg-white/10"
+            >
+              <Users className="h-5 w-5 text-white/80" />
+              <span className="text-[10px] font-bold text-white/80">People</span>
+            </button>
+          </div>
+        </div>
+      )}
+
       <footer className="flex items-center justify-between border-t border-white/5 bg-call-bg/95 px-4 py-3 backdrop-blur">
         <div className="hidden text-xs text-white/40 sm:block">
           {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
         </div>
-        <div className="mx-auto flex items-center gap-2">
+        
+        {/* Desktop controls (hidden on mobile) */}
+        <div className="hidden sm:flex mx-auto items-center gap-2">
           <ControlBtn
             active={micOn}
             onClick={() => setMicOn((v) => !v)}
@@ -1072,6 +1182,46 @@ function RoomPage() {
             <span className="hidden sm:inline">Leave</span>
           </button>
         </div>
+
+        {/* Mobile controls (hidden on desktop) */}
+        <div className="flex sm:hidden mx-auto items-center gap-2">
+          <ControlBtn
+            active={micOn}
+            onClick={() => setMicOn((v) => !v)}
+            label={micOn ? "Mute" : "Unmute"}
+          >
+            {micOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
+          </ControlBtn>
+          <ControlBtn
+            active={camOn}
+            onClick={() => setCamOn((v) => !v)}
+            label={camOn ? "Stop video" : "Start video"}
+          >
+            {camOn ? <VideoIcon className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
+          </ControlBtn>
+          <ControlBtn
+            active={!handRaised}
+            onClick={() => setHandRaised((v) => !v)}
+            label="Raise hand"
+          >
+            <Hand className="h-5 w-5" />
+          </ControlBtn>
+          <ControlBtn
+            active={!showMoreMenu}
+            onClick={() => setShowMoreMenu((v) => !v)}
+            label="More options"
+          >
+            <MoreVertical className="h-5 w-5" />
+          </ControlBtn>
+          <button
+            onClick={leave}
+            className="ml-2 flex h-12 w-12 items-center justify-center rounded-2xl bg-destructive text-white shadow-soft transition hover:opacity-90 animate-pulse"
+            style={{ animationDuration: "3s" }}
+          >
+            <PhoneOff className="h-5 w-5" />
+          </button>
+        </div>
+
         <div className="hidden w-10 sm:block" />
       </footer>
 
@@ -1092,13 +1242,18 @@ const Tile = memo(function Tile({
   name,
   children,
   accent,
+  aspect = "aspect-video",
 }: {
   name: string;
   children: React.ReactNode;
   accent?: string;
+  aspect?: string;
 }) {
   return (
-    <div className="group relative aspect-video overflow-hidden rounded-[2.5rem] bg-white/5 border border-white/10 shadow-elevated transition-all hover:bg-white/10">
+    <div className={cn(
+      "group relative overflow-hidden rounded-2xl sm:rounded-[2.5rem] bg-white/5 border border-white/10 shadow-elevated transition-all hover:bg-white/10",
+      aspect
+    )}>
       {children}
       <div className="absolute bottom-3 left-3 flex items-center gap-2 rounded-xl bg-black/60 px-3 py-1.5 text-xs font-semibold backdrop-blur-md border border-white/5">
         {accent && <span className={cn("h-2 w-2 rounded-full animate-pulse", accent)} />}
